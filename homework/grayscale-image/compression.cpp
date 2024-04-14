@@ -1,21 +1,20 @@
 #include "compression.hpp"
+#include <algorithm>
 
 std::vector<std::pair<uint8_t, uint8_t>> compressGrayscale(const std::array<std::array<uint8_t, width>, height>& arr) {
     std::vector<std::pair<uint8_t, uint8_t>> vec;
-    for (auto row : arr) {
-        uint8_t tmpVal = row.at(0);
-        int indexPair = 1;
-        for (size_t i = 1; i < row.size(); ++i) {
-            if (row.at(i) != tmpVal) {
-                vec.push_back({tmpVal, indexPair});
-                tmpVal = row.at(i);
-                indexPair = 1;
-            } else {
-                ++indexPair;
+    std::for_each(arr.begin(), arr.end(), [&vec](const auto& row) {
+        auto start = row.begin();
+        while (start != row.end()) {
+            auto next = std::adjacent_find(start, row.end(), std::not_equal_to<>());
+            if (next != row.end()) {
+                ++next;
             }
+            int count = std::distance(start, next);
+            vec.push_back({*start, count});
+            start = next;
         }
-        vec.push_back({tmpVal, indexPair});
-    }
+    });
     return vec;
 }
 
@@ -43,8 +42,8 @@ std::array<std::array<uint8_t, width>, height> decompressGrayscale(const std::ve
 }
 
 void printMap(const std::array<std::array<uint8_t, 32>, 32>& arr) {
-    for (auto row : arr) {
-        for (auto v : row) {
+    std::for_each(arr.begin(), arr.end(), [](const auto &row){
+        std::for_each(row.begin(), row.end(), [](const auto &v){
             if (unsigned(v) == 0) {
                 std::cout << " ";
             } else if (unsigned(v) > 0 && unsigned(v) < 33) {
@@ -52,7 +51,7 @@ void printMap(const std::array<std::array<uint8_t, 32>, 32>& arr) {
             } else {
                 std::cout << v;
             }
-        }
+        });
         std::cout << std::endl;
-    }
+    });
 }

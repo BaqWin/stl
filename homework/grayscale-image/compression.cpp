@@ -3,41 +3,35 @@
 
 std::vector<std::pair<uint8_t, uint8_t>> compressGrayscale(const std::array<std::array<uint8_t, width>, height>& arr) {
     std::vector<std::pair<uint8_t, uint8_t>> vec;
-    std::for_each(arr.begin(), arr.end(), [&vec](const auto& row) {
-        auto start = row.begin();
-        while (start != row.end()) {
-            auto next = std::adjacent_find(start, row.end(), std::not_equal_to<>());
-            if (next != row.end()) {
-                ++next;
+    std::for_each(arr.begin(), arr.end(), [&vec](auto &row){
+        uint8_t tmpVal = row.at(0);
+        int indexPair = 1;
+        std::for_each(row.begin() + 1, row.end(), [&vec, &indexPair, &tmpVal](auto &val){
+            if (val != tmpVal) {
+                vec.push_back({tmpVal, indexPair});
+                tmpVal = val;
+                indexPair = 1;
+            } else {
+                ++indexPair;
             }
-            int count = std::distance(start, next);
-            vec.push_back({*start, count});
-            start = next;
-        }
+        });
+        vec.push_back({tmpVal, indexPair});
     });
     return vec;
 }
 
 std::array<std::array<uint8_t, width>, height> decompressGrayscale(const std::vector<std::pair<uint8_t, uint8_t>>& vec) {
     std::array<std::array<uint8_t, width>, height> arr;
-    int indexH = 0;
-    int indexW = 0;
-    int vecIndex = 0;
-    int valCount = vec.at(vecIndex).second;
-    while (indexH < height) {
-        if (valCount == 0) {
-            ++vecIndex;
-            valCount = vec.at(vecIndex).second;
-        } else {
-            arr[indexH][indexW] = vec.at(vecIndex).first;
-            --valCount;
-            ++indexW;
-            if (indexW == width) {
-                indexW = 0;
-                ++indexH;
-            }
+    auto itArr = arr.begin();
+    auto innerItArr = arr.begin()->begin();
+    std::for_each(vec.begin(), vec.end(), [&itArr, &innerItArr](auto &val){
+        if(innerItArr == itArr->end()){
+            ++itArr;
+            innerItArr = itArr->begin();
         }
-    }
+        std::fill_n(innerItArr, val.second, val.first);
+        innerItArr = innerItArr + val.second;
+    });
     return arr;
 }
 

@@ -12,13 +12,9 @@ double ArithmeticAverage(std::vector<int>& first, std::vector<int>& second) {
 }
 
 double Distance(std::vector<int>& first, std::vector<int>& second) {
-    double result;
-    std::multimap<int, int> map;
-    for (auto i = first.begin(), j = second.begin(); i < first.end() && j < second.end(); ++i, ++j) {
-        map.insert({*i, *j});
+    double result = 0.0;
+    for (size_t i = 0; i < first.size(); ++i) {
+        result += std::pow(static_cast<double>(first[i] - second[i]), 2);
     }
-    std::for_each(map.begin(), map.end(), [&result](auto& pair) {
-        result += std::pow((pair.first - pair.second), 2);
-    });
     return std::sqrt(result);
 }
